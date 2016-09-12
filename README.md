@@ -1,7 +1,8 @@
 # PHP JWT Tokens with RSA Support
+
 PHP Implementation of JSON Web token with RSA.
 
-## Supported algorithms : 
+## Supported algorithms: 
 	RSA (Public Key/Private Key pair)
 	
 	RS256 - RSA using SHA-256 hash algorithm
@@ -17,12 +18,15 @@ PHP Implementation of JSON Web token with RSA.
 ## Install
 
 With composer
-```shell
+
+```
 composer require xaamin/jwt
 ````
+
 # How to use with RSA public/private key
 
 Set configuration in **src/Config/config.php**. Don't use key provided here in production.
+
 ```
     'algorithm' => 'RS512',
     
@@ -38,22 +42,22 @@ Set configuration in **src/Config/config.php**. Don't use key provided here in p
 
 
 ```php
-$payload = [
-		'sub'   => 1,
-		'username' => 'xaamin'
-    ];
+	$payload = [
+			'sub'   => 1,
+			'username' => 'xaamin'
+	    ];
 
-// Generate token
-$token = Xaamin\JWT\Facade\Native\JWT::encode($payload);
+	// Generate token
+	$token = Xaamin\JWT\Facade\Native\JWT::encode($payload);
 
-// Verify the token
-try{
-	$token = Xaamin\JWT\Facade\Native\JWT::decode($token->get());
+	// Verify the token
+	try{
+		$token = Xaamin\JWT\Facade\Native\JWT::decode($token->get());
 
-    var_dump($token);
-} catch (Exception $e) {
-	echo $e->getMessage();
-}
+	    var_dump($token);
+	} catch (Exception $e) {
+		echo $e->getMessage();
+	}
 ```
 
 ## How to use with HMAC
@@ -67,20 +71,20 @@ Set configuration in **src/Config/config.php**
 ```
 
 ```php
-$payload = [
-		'sub'   => 1,
-		'username' => 'xaamin'
-    ];
+	$payload = [
+			'sub'   => 1,
+			'username' => 'xaamin'
+	    ];
 
-// Generate token
-$token = Xaamin\JWT\Facade\Native\JWT::encode($payload);
+	// Generate token
+	$token = Xaamin\JWT\Facade\Native\JWT::encode($payload);
 
-// Verify the token
-try{
-	$token = Xaamin\JWT\Facade\Native\JWT::decode($token->get());
+	// Verify the token
+	try{
+		$token = Xaamin\JWT\Facade\Native\JWT::decode($token->get());
 
-    var_dump($token);
-} catch (Exception $e) {
-	echo $e->getMessage();
-}
+	    var_dump($token);
+	} catch (Exception $e) {
+		echo $e->getMessage();
+	}
 ```
