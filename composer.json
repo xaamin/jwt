@@ -1,0 +1,27 @@
+{
+    "name": "xaamin/jwt",
+    "description": "PHP Implementation of JSON Web token with RSA",
+    "license": "MIT",
+    "keywords": [
+        "token",
+        "jwt",
+        "laravel jwt"
+    ],
+    "authors": [
+        {
+            "name": "Benjamín Martínez Mateos",
+            "email": "xaamin@outlook.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+    },
+    "suggest": {
+        "illuminate/support": "For use on Laravel 5.x"
+    },
+    "autoload": {
+        "psr-4": {
+            "Xaamin\\JWT\\": "src/"
+        }
+    }
+}
