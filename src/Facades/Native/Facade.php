@@ -4,16 +4,16 @@ namespace Xaamin\JWT\Facades\Native;
 abstract class Facade {
 
 	/**
-	 * WhatsapiInterface implementation.
+	 * JWTI instance
 	 *
-	 * @var Xaamin\Whatsapi\Contracts\WhatsapiInterface
+	 * @var \Xaamin\JWT\JWT
 	 */
 	protected static $instance;
 
 	/**
-	 * Returns the implementation implementation registered with the Facade.
+	 * Returns the implementation registered with the Facade.
 	 *
-	 * @return Xaamin\Whatsapi\Contracts\WhatsapiInterface
+	 * @return \Xaamin\JWT\JWT
 	 */
 	public static function instance()
 	{
