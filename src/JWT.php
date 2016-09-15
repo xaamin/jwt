@@ -28,6 +28,13 @@ class JWT
     protected $factory;
 
     /**
+     * Prefix for header authorization
+     * 
+     * @var string
+     */
+    protected $prefixAuthHeader = 'Bearer';
+
+    /**
      * Constructor
      * 
      * @param \Xaamin\JWT\Contracts\Signer  $signer
@@ -40,7 +47,7 @@ class JWT
     }
 
     /**
-     * Generate new JWT token
+     * Generate new token
      * 
      * @param  \Xaamin\JWT\Payload $payload
      * 
@@ -80,7 +87,7 @@ class JWT
     }
 
     /**
-     * Decodes a JWT token
+     * Decodes a token
      * 
      * @param  string $jwt
      * 
@@ -88,6 +95,7 @@ class JWT
      */
     public function decode($jwt)
     {
+        $jwt = trim(str_replace($this->prefixAuthHeader, '', $jwt));
         $token = new Token($jwt);
 
         $headerB64 = $token->getHeaderBase64();
@@ -106,7 +114,7 @@ class JWT
     }
 
     /**
-     * Refresh JWT token
+     * Refresh token
      * 
      * @param  string   $jwt
      * 
@@ -118,9 +126,41 @@ class JWT
 
         $payload = new Payload($claims, $this->factory->getPayloadValidator(), true);
 
-        $payload = $this->factory->addClaims($claims)->make();
-
         return $this->generateNewToken($payload);
+    }
+
+    /**
+     * Validates token validity
+     * 
+     * @param  string   $jwt
+     * 
+     * @return boolean
+     */
+    public function check($jwt)
+    {
+        try {
+            $this->checkOrFail($jwt);
+        } catch (JWTException $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates token validity
+     * 
+     * @param  string   $jwt
+     *
+     * @throws \Xaamin\JWT\Exceptions\JWTException
+     * 
+     * @return \Xaamin\JWT\Payload
+     */
+    public function checkOrFail($jwt)
+    {
+        $claims = $this->decode($jwt)->getPayload();
+
+        return new Payload($claims, $this->factory->getPayloadValidator());
     }
 
     /**
@@ -133,6 +173,18 @@ class JWT
     public function setSigner(Signer $signer)
     {
         $this->signer = $signer;
+    }
+
+    /**
+     * Set prefix for authorization header
+     * 
+     * @param string $prefix [description];
+     *
+     * @return $this
+     */
+    public function setAuthorizationHeaderPrefix($prefix)
+    {
+        $this->prefixAuthHeader = $prefix;
     }
 
     /**
