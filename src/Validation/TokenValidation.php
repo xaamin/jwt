@@ -36,7 +36,7 @@ class TokenValidation extends Validator
     protected function validateStructure($parts, $token)
     {
         if (count($parts) !== 3) {
-            throw new TokenInvalidException('Wrong number of parts');
+            throw new TokenInvalidException('Wrong number of parts for token');
         }
 
         $parts = array_filter(array_map('trim', $parts));

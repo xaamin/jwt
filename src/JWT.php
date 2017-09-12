@@ -95,7 +95,8 @@ class JWT
      */
     public function decode($jwt)
     {
-        $jwt = trim(str_replace($this->prefixAuthHeader, '', $jwt));
+        $jwt = $this->parse($jwt);
+        
         $token = new Token($jwt);
 
         $headerB64 = $token->getHeaderBase64();
@@ -125,6 +126,8 @@ class JWT
         $claims = $this->decode($jwt)->getPayload();
 
         $payload = new Payload($claims, $this->factory->getPayloadValidator(), true);
+
+        $payload = $this->factory->addClaims($payload->get())->make();
 
         return $this->generateNewToken($payload);
     }
@@ -185,6 +188,23 @@ class JWT
     public function setAuthorizationHeaderPrefix($prefix)
     {
         $this->prefixAuthHeader = $prefix;
+    }
+
+    /**
+     * Parse token from header
+     * 
+     * @param  string $headerPrefix
+     * @return string
+     */
+    protected function parse($jwt, $headerPrefix = 'Bearer')
+    {
+        $jwt = trim(str_replace($this->prefixAuthHeader, '', $jwt));
+
+        if (!$jwt) {
+            throw new TokenInvalidException('Missing authentication token');
+        }
+
+        return $jwt;
     }
 
     /**

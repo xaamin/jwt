@@ -4,6 +4,7 @@ namespace Xaamin\JWT\Providers\Middleware;
 use Closure;
 use Xaamin\JWT\JWT;
 use Xaamin\JWT\Exceptions\JWTException;
+use Xaamin\JWT\Exceptions\TokenExpiredException;
 
 class TokenValidation
 {
@@ -25,10 +26,19 @@ class TokenValidation
     {
         try {
             $this->jwt->checkOrFail($request->header('Authorization'));
+        } catch (TokenExpiredException $e) {
+            $data = [
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'code' => 51
+                ];
+
+            return response()->json($data, 401);
         } catch (JWTException $e) {
             $data = [
                     'success' => false,
-                    'message' => 'Unauthorized'
+                    'message' => $e->getMessage(),
+                    'code' => 50
                 ];
 
             return response()->json($data, 401);

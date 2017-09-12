@@ -32,14 +32,14 @@ class Factory
 
     /**
      * Payload validator
-     * 
+     *
      * @var \Xaamin\JWT\Validation\PayloadValidation
      */
     protected $validation;
 
     /**
      * Constructor
-     * 
+     *
      * @param \Xaamin\JWT\Validation\PayloadValidation $validation
      */
     public function __construct(PayloadValidation $validation)
@@ -169,7 +169,22 @@ class Factory
      */
     public function iss()
     {
-        return 'http://itnovado.com';
+        $issuer = 'http';
+        $https = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : 'off';
+
+        if (strtolower($https) != 'off') {
+            $issuer .= "s";
+        }
+
+        $issuer .= '://' . (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
+
+        if (isset($_SERVER['SERVER_PORT']) and $_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') {
+            $issuer .= ':' .$_SERVER['SERVER_PORT'];
+        }
+
+        $issuer .= isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+
+        return $issuer;
     }
 
     /**
@@ -222,7 +237,7 @@ class Factory
     public function setTTL($ttl)
     {
         $this->ttl = $ttl;
-        
+
         return $this;
     }
 
@@ -262,7 +277,7 @@ class Factory
 
     /**
      * Returns the Payload Validator instance
-     * 
+     *
      * @return \Xaamin\JWT\Validation\PayloadValidation
      */
     public function getPayloadValidator()
