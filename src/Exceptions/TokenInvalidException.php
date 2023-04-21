@@ -1,7 +1,7 @@
 <?php
-namespace Xaamin\JWT\Exceptions;
 
-class TokenInvalidException extends JWTException 
+namespace Xaamin\Jwt\Exceptions;
+
+class TokenInvalidException extends JwtException
 {
-	
 }

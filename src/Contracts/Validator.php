@@ -1,12 +1,13 @@
 <?php
-namespace Xaamin\JWT\Contracts;
+
+namespace Xaamin\Jwt\Contracts;
 
 interface Validator
 {
     /**
      * Helper function to return a boolean.
      *
-     * @param  array  $value
+     * @param string $value
      *
      * @return bool
      */
@@ -15,7 +16,7 @@ interface Validator
     /**
      * Perform some checks on the value.
      *
-     * @param  mixed  $value
+     * @param mixed $value
      *
      * @return void
      */

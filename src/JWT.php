@@ -1,68 +1,95 @@
 <?php
-namespace Xaamin\JWT;
 
-use Xaamin\JWT\Token;
-use Xaamin\JWT\Support\Str;
-use Xaamin\JWT\Support\Date;
-use Xaamin\JWT\Signer\Native;
-use Xaamin\JWT\Support\Base64;
-use Xaamin\JWT\Contracts\Signer;
-use Xaamin\JWT\Exceptions\JWTException;
-use Xaamin\JWT\Validation\TokenValidation;
-use Xaamin\JWT\Exceptions\TokenInvalidException;
+namespace Xaamin\Jwt;
 
-class JWT
+use RuntimeException;
+use Xaamin\Jwt\Token;
+use Xaamin\Jwt\Support\Date;
+use Xaamin\Jwt\Signer\Native;
+use Xaamin\Jwt\Support\Base64;
+use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Contracts\Signer;
+use Xaamin\Jwt\Exceptions\JwtException;
+use Xaamin\Jwt\Exceptions\TokenInvalidException;
+use Xaamin\Jwt\Exceptions\TokenInvalidSignatureException;
+
+class Jwt
 {
     /**
      * Signer implementation
-     * 
-     * @var \Xaamin\JWT\Contracts\Signer
+     *
+     * @var Signer|null
      */
     protected $signer;
 
     /**
      * Claim factory
-     * 
-     * @var \Xaamin\JWT\Factory
+     *
+     * @var Factory
      */
     protected $factory;
 
     /**
-     * Prefix for header authorization
-     * 
-     * @var string
+     * Custom refresh TTL
+     *
+     * @var int|null
      */
-    protected $prefixAuthHeader = 'Bearer';
+    protected $refreshTtl = JwtTtl::REFRESH_TTL;
 
     /**
      * Constructor
-     * 
-     * @param \Xaamin\JWT\Contracts\Signer  $signer
-     * @param \Xaamin\JWT\Factory           $factory
+     *
+     * @param Signer|null  $signer
+     * @param Factory|null $factory
      */
-    public function __construct(Signer $signer, Factory $factory)
+    public function __construct(Signer $signer = null, Factory $factory = null)
     {
         $this->signer = $signer;
-        $this->factory = $factory;
+        $this->factory = $factory ?: new Factory();
+    }
+
+     /**
+      * Constructor
+      *
+      * @param string                                          $secret
+      * @param string                                          $algorithm
+      * @param array{private:string,public:string}|array<void> $keys
+      *
+      * @return Jwt
+      */
+    public function with($secret, $algorithm = 'HS512', array $keys = [])
+    {
+        $this->signer = new Native($secret, $algorithm, $keys);
+
+        return $this;
     }
 
     /**
      * Generate new token
-     * 
-     * @param  \Xaamin\JWT\Payload $payload
-     * 
-     * @return \Xaamin\JWT\Token
+     *
+     * @param Payload $payload
+     *
+     * @throws RuntimeException
+     *
+     * @return Token
      */
     private function generateNewToken(Payload $payload)
     {
+        if (!$this->signer) {
+            throw new RuntimeException('No signer provided');
+        }
+
         $header = [
-                'typ' => 'JWT', 
-                'alg' => $this->signer->getAlgorithm()
-            ];
+            'typ' => 'Jwt',
+            'alg' => $this->signer->getAlgorithm()
+        ];
+
+        /** @var string */
+        $headerB64 = json_encode($header);
 
         $segments = [
-            Base64::encode(json_encode($header), JSON_UNESCAPED_SLASHES),
-            Base64::encode($payload->toJson(), JSON_UNESCAPED_SLASHES)
+            Base64::encode($headerB64),
+            Base64::encode($payload->toJson())
         ];
 
         $signature = $this->signer->sign(implode('.', $segments));
@@ -74,10 +101,10 @@ class JWT
 
     /**
      * Encode a Payload and return the Token.
-     * 
-     * @param  array  $claims 
-     * 
-     * @return \Xaamin\JWT\Token
+     *
+     * @param array <string,mixed> $claims
+     *
+     * @return Token
      */
     public function encode(array $claims)
     {
@@ -88,15 +115,21 @@ class JWT
 
     /**
      * Decodes a token
-     * 
-     * @param  string $jwt
-     * 
-     * @return \Xaamin\JWT\Token
+     *
+     * @param string $jwt
+     *
+     * @throws RuntimeException
+     *
+     * @return Token
      */
     public function decode($jwt)
     {
+        if (!$this->signer) {
+            throw new RuntimeException('No signer provided');
+        }
+
         $jwt = $this->parse($jwt);
-        
+
         $token = new Token($jwt);
 
         $headerB64 = $token->getHeaderBase64();
@@ -104,11 +137,11 @@ class JWT
         $header = $token->getHeader();
 
         if (empty($header['alg'])) {
-            throw new JWTException('Empty algorithm');
+            throw new JwtException('Empty algorithm');
         }
 
-        if (!$this->signer->verify($token->getSignature(), "$headerB64.$payloadB64")) {
-            throw new TokenInvalidException('Signature verification failed');
+        if (!$this->signer->verify($token->getSignature(), "{$headerB64}.{$payloadB64}")) {
+            throw new TokenInvalidSignatureException('Signature verification failed');
         }
 
         return $token;
@@ -116,34 +149,37 @@ class JWT
 
     /**
      * Refresh token
-     * 
-     * @param  string   $jwt
-     * 
-     * @return \Xaamin\JWT\Token
+     *
+     * @param string $jwt
+     *
+     * @return Token
      */
     public function refresh($jwt)
     {
         $claims = $this->decode($jwt)->getPayload();
 
-        $payload = new Payload($claims, $this->factory->getPayloadValidator(), true);
+        $payload = (new Payload($claims, true, $this->refreshTtl))->check();
 
-        $payload = $this->factory->addClaims($payload->get())->make();
+        /** @var array<string,mixed> */
+        $payload = $payload->get();
+
+        $payload = $this->factory->addClaims($payload)->make();
 
         return $this->generateNewToken($payload);
     }
 
     /**
      * Validates token validity
-     * 
-     * @param  string   $jwt
-     * 
+     *
+     * @param string $jwt
+     *
      * @return boolean
      */
     public function check($jwt)
     {
         try {
             $this->checkOrFail($jwt);
-        } catch (JWTException $e) {
+        } catch (JwtException $e) {
             return false;
         }
 
@@ -152,53 +188,100 @@ class JWT
 
     /**
      * Validates token validity
-     * 
-     * @param  string   $jwt
      *
-     * @throws \Xaamin\JWT\Exceptions\JWTException
-     * 
-     * @return \Xaamin\JWT\Payload
+     * @param string $jwt
+     *
+     * @throws JwtException
+     *
+     * @return Payload
      */
     public function checkOrFail($jwt)
     {
         $claims = $this->decode($jwt)->getPayload();
 
-        return new Payload($claims, $this->factory->getPayloadValidator());
+        return (new Payload($claims))->check();
     }
 
     /**
      * Set new Signer strategy
-     * 
-     * @param \Xaamin\JWT\Contracts\Signer $signer
      *
-     * @return void
+     * @param Contracts\Signer $signer
+     *
+     * @return Jwt
      */
     public function setSigner(Signer $signer)
     {
         $this->signer = $signer;
+
+        return $this;
     }
 
     /**
-     * Set prefix for authorization header
-     * 
-     * @param string $prefix [description];
+     * Set the token ttl
+     *
+     * @param int $seconds
+     *
+     * @return Jwt
+     */
+    public function setLeeway($seconds)
+    {
+        Date::$leeway = $seconds;
+
+        return $this;
+    }
+
+    /**
+     * Set the token ttl
+     *
+     * @param int $minutes
+     *
+     * @return Jwt
+     */
+    public function setTtl($minutes)
+    {
+        $this->factory->setTtl($minutes);
+
+        return $this;
+    }
+
+    /**
+     * Set the token ttl
+     *
+     * @param int|null $minutes
+     *
+     * @return Jwt
+     */
+    public function setRefreshTtl($minutes)
+    {
+        $this->refreshTtl = $minutes;
+
+        return $this;
+    }
+
+    /**
+     * Sets the issuer.
+     *
+     * @param string $issuer
      *
      * @return $this
      */
-    public function setAuthorizationHeaderPrefix($prefix)
+    public function setIssuer($issuer)
     {
-        $this->prefixAuthHeader = $prefix;
+        $this->factory->setIssuer($issuer);
+
+        return $this;
     }
 
     /**
      * Parse token from header
-     * 
-     * @param  string $headerPrefix
+     *
+     * @param  string $token
      * @return string
      */
-    protected function parse($jwt, $headerPrefix = 'Bearer')
+    protected function parse($token)
     {
-        $jwt = trim(str_replace($this->prefixAuthHeader, '', $jwt));
+        $parts = explode(' ', $token);
+        $jwt = trim(array_pop($parts));
 
         if (!$jwt) {
             throw new TokenInvalidException('Missing authentication token');
@@ -209,14 +292,22 @@ class JWT
 
     /**
      * Magic method call on claims facory
-     * 
-     * @param  string   $method
-     * @param  array    $parameters
-     * 
+     *
+     * @param string       $method
+     * @param array<mixed> $parameters
+     *
+     * @throws RuntimeException
+     *
      * @return mixed
      */
     public function __call($method, $parameters)
     {
-        return call_user_func_array([$this->factory, $method], $parameters);
+        $callable = [$this->factory, $method];
+
+        if (is_callable($callable)) {
+            return call_user_func_array($callable, $parameters);
+        }
+
+        throw new RuntimeException("Method {$method} not found or not callable.");
     }
 }

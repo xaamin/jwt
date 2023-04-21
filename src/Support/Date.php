@@ -1,53 +1,72 @@
 <?php
-namespace Xaamin\JWT\Support;
 
-use Carbon\Carbon;
+namespace Xaamin\Jwt\Support;
+
+use DateTime;
+use DateTimeZone;
+use Xaamin\Jwt\Constants\JwtTtl;
 
 class Date
 {
     /**
-     * Get the Carbon instance for the current time.
+     * Time tolerance
      *
-     * @return \Carbon\Carbon
+     * @var int
+     */
+    public static $leeway = JwtTtl::LEEWAY;
+
+    /**
+     * Get the date instance for the current time.
+     *
+     * @return DateTime
      */
     public static function now()
     {
-        return Carbon::now('UTC');
+        return new DateTime('now', new DateTimeZone('UTC'));
     }
 
     /**
      * Get the Carbon instance for the timestamp.
      *
-     * @param  int  $timestamp
+     * @param int $timestamp
      *
-     * @return \Carbon\Carbon
+     * @return DateTime
      */
     public static function timestamp($timestamp)
     {
-        return Carbon::createFromTimeStampUTC($timestamp)->timezone('UTC');
+        return new DateTime("@{$timestamp}", new DateTimeZone('UTC'));
     }
 
     /**
      * Checks if a timestamp is in the past.
      *
-     * @param  int  $timestamp
+     * @param int $timestamp
      *
      * @return bool
      */
     public static function isPast($timestamp)
     {
-        return static::timestamp($timestamp)->isPast();
+        $leeway = static::$leeway;
+
+        $timestamp = static::timestamp($timestamp)->getTimestamp();
+        $current = static::now()->modify("-{$leeway} seconds")->getTimestamp();
+
+        return $timestamp < $current;
     }
 
     /**
      * Checks if a timestamp is in the future.
      *
-     * @param  int  $timestamp
+     * @param int $timestamp
      *
      * @return bool
      */
     public static function isFuture($timestamp)
     {
-        return static::timestamp($timestamp)->isFuture();
+        $leeway = static::$leeway;
+        $timestamp = static::timestamp($timestamp)->getTimestamp();
+        $current = static::now()->modify("+{$leeway} seconds")->getTimestamp();
+
+        return $timestamp > $current;
     }
 }

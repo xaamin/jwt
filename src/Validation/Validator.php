@@ -1,27 +1,28 @@
 <?php
-namespace Xaamin\JWT\Validation;
 
-use Xaamin\JWT\JWTException;
-use Xaamin\JWT\Contracts\Validator as ValidatorContract;
+namespace Xaamin\Jwt\Validation;
+
+use Xaamin\Jwt\Exceptions\JwtException;
+use Xaamin\Jwt\Contracts\Validator as ValidatorContract;
 
 abstract class Validator implements ValidatorContract
 {
-	/**
-	 * {@inheritDoc}
-	 */
-	public function isValid($value)
-	{
-		try {
+    /**
+     * {@inheritDoc}
+     */
+    public function isValid($value)
+    {
+        try {
             $this->check($value);
-        } catch (JWTException $e) {
+        } catch (JwtException $e) {
             return false;
         }
 
         return true;
-	}
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	abstract public function check($value);
+    /**
+     * {@inheritDoc}
+     */
+    abstract public function check($value);
 }

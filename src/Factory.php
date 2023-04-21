@@ -1,70 +1,75 @@
 <?php
-namespace Xaamin\JWT;
 
-use Xaamin\JWT\Payload;
-use Xaamin\JWT\Support\Str;
-use Xaamin\JWT\Support\Date;
-use Xaamin\JWT\Validation\PayloadValidation;
+namespace Xaamin\Jwt;
+
+use Xaamin\Jwt\Payload;
+use Xaamin\Jwt\Support\Str;
+use Xaamin\Jwt\Support\Date;
+use Xaamin\Jwt\Constants\JwtTtl;
 
 class Factory
 {
     /**
      * @var int
      */
-    protected $ttl = 60;
+    protected $ttl = JwtTtl::TTL;
 
     /**
-     * @var array
+     * The issuer
+     *
+     * @var string
+     */
+    protected $issuer = null;
+
+    /**
+     * @var string[]
      */
     protected $defaultClaims = ['iss', 'iat', 'exp', 'nbf', 'jti'];
 
     /**
-     * @var array
+     * @var array<string,mixed>
      */
     protected $claims = [];
 
     /**
+     * Array of claims to ignore
+     *
+     * @var array<string>
+     */
+    protected $except = [];
+
+    /**
      * Custom claims.
      *
-     * @var array
+     * @var array<string,mixed>
      */
     protected $customClaims = [];
 
     /**
-     * Payload validator
+     * Required claims.
      *
-     * @var \Xaamin\JWT\Validation\PayloadValidation
+     * @var string[]
      */
-    protected $validation;
-
-    /**
-     * Constructor
-     *
-     * @param \Xaamin\JWT\Validation\PayloadValidation $validation
-     */
-    public function __construct(PayloadValidation $validation)
-    {
-        $this->validation = $validation;
-    }
+    protected $requiredClaims = [];
 
     /**
      * Create the Payload instance.
      *
-     * @return \Xaamin\JWT\Payload
+     * @return Payload
      */
     public function make()
     {
         $claims = $this->buildClaims();
 
-        return new Payload($claims, $this->validation);
+        return (new Payload($claims, false))->check($this->except);
     }
 
     /**
      * Add an array of claims to the Payload.
      *
-     * @param  array  $claims
+     * @param array<string,mixed> $claims
      *
-     * @return $this
+     * @return Factory
      */
     public function addClaims(array $claims)
     {
@@ -78,10 +83,10 @@ class Factory
     /**
      * Add a claim to the Payload.
      *
-     * @param  string  $name
-     * @param  mixed  $value
+     * @param string $name
+     * @param mixed  $value
      *
-     * @return $this
+     * @return Factory
      */
     public function addClaim($name, $value)
     {
@@ -93,9 +98,9 @@ class Factory
     /**
      * Set the custom claims.
      *
-     * @param  array  $customClaims
+     * @param array<string,mixed> $customClaims
      *
-     * @return $this
+     * @return Factory
      */
     public function addCustomClaims(array $customClaims)
     {
@@ -107,9 +112,9 @@ class Factory
     /**
      * Alias to set the custom claims.
      *
-     * @param  array  $customClaims
+     * @param array<string,mixed> $customClaims
      *
-     * @return $this
+     * @return Factory
      */
     public function claims(array $customClaims)
     {
@@ -118,7 +123,7 @@ class Factory
     /**
      * Get the custom claims.
      *
-     * @return array
+     * @return array<string,mixed>
      */
     public function getCustomClaims()
     {
@@ -128,10 +133,12 @@ class Factory
     /**
      * Build the default claims.
      *
-     * @return array
+     * @return array<string,mixed>
      */
     protected function buildClaims()
     {
+        $this->except = [];
+
         // Remove the exp claim if it exists and the ttl is null
         if ($this->ttl === null && $key = array_search('exp', $this->defaultClaims)) {
             unset($this->defaultClaims[$key]);
@@ -139,7 +146,11 @@ class Factory
 
         // Add the default claims
         foreach ($this->defaultClaims as $claim) {
-            $this->addClaim($claim, $this->$claim());
+            if (!isset($this->claims[$claim])) {
+                $this->addClaim($claim, $this->$claim());
+            } elseif (in_array($claim, ['iat', 'nbf', 'exp'])) {
+                $this->except[] = $claim;
+            }
         }
 
         // Add custom claims on top, allowing them to overwrite defaults
@@ -151,13 +162,27 @@ class Factory
     /**
      * Sets the required claims.
      *
-     * @param  array  $claims
+     * @param string[] $claims
      *
-     * @return $this
+     * @return Factory
      */
     public function setRequiredClaims(array $claims)
     {
         $this->requiredClaims = $claims;
+
+        return $this;
+    }
+
+    /**
+     * Sets the issuer.
+     *
+     * @param string $issuer
+     *
+     * @return Factory
+     */
+    public function setIssuer($issuer)
+    {
+        $this->issuer = $issuer;
 
         return $this;
     }
@@ -169,22 +194,31 @@ class Factory
      */
     public function iss()
     {
+        if ($this->issuer) {
+            return $this->issuer;
+        }
+
         $issuer = 'http';
+
         $https = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : 'off';
+        $host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost';
+        $hasCustomPort = isset($_SERVER['SERVER_PORT'])
+            && $_SERVER['SERVER_PORT'] != '80'
+            && $_SERVER['SERVER_PORT'] != '443';
 
         if (strtolower($https) != 'off') {
             $issuer .= "s";
         }
 
-        $issuer .= '://' . (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
+        $issuer .= '://' . $host;
 
-        if (isset($_SERVER['SERVER_PORT']) and $_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') {
-            $issuer .= ':' .$_SERVER['SERVER_PORT'];
+        if ($hasCustomPort) {
+            $issuer .= ':' . $_SERVER['SERVER_PORT'];
         }
 
         $issuer .= isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
-        return $issuer;
+        return trim($issuer, '/');
     }
 
     /**
@@ -204,7 +238,7 @@ class Factory
      */
     public function exp()
     {
-        return Date::now()->addMinutes($this->ttl)->getTimestamp();
+        return Date::now()->modify("+{$this->ttl} minutes")->getTimestamp();
     }
 
     /**
@@ -230,11 +264,11 @@ class Factory
     /**
      * Set the token ttl (in minutes).
      *
-     * @param  int  $ttl
+     * @param int $ttl
      *
-     * @return $this
+     * @return Factory
      */
-    public function setTTL($ttl)
+    public function setTtl($ttl)
     {
         $this->ttl = $ttl;
 
@@ -246,7 +280,7 @@ class Factory
      *
      * @return int
      */
-    public function getTTL()
+    public function getTtl()
     {
         return $this->ttl;
     }
@@ -254,9 +288,9 @@ class Factory
     /**
      * Set the default claims to be added to the Payload.
      *
-     * @param  array  $claims
+     * @param string[] $claims
      *
-     * @return $this
+     * @return Factory
      */
     public function setDefaultClaims(array $claims)
     {
@@ -268,7 +302,7 @@ class Factory
     /**
      * Get the default claims.
      *
-     * @return array
+     * @return string[]
      */
     public function getDefaultClaims()
     {
@@ -276,22 +310,12 @@ class Factory
     }
 
     /**
-     * Returns the Payload Validator instance
-     *
-     * @return \Xaamin\JWT\Validation\PayloadValidation
-     */
-    public function getPayloadValidator()
-    {
-        return $this->validation;
-    }
-
-    /**
      * Magically add a claim.
      *
-     * @param  string  $method
-     * @param  array  $parameters
+     * @param string       $method
+     * @param array<mixed> $parameters
      *
-     * @return $this
+     * @return Factory
      */
     public function __call($method, $parameters)
     {

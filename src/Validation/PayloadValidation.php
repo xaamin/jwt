@@ -1,21 +1,24 @@
 <?php
-namespace Xaamin\JWT\Validation;
 
-use Xaamin\JWT\Support\Date;
-use Xaamin\JWT\Exceptions\TokenExpiredException;
-use Xaamin\JWT\Exceptions\TokenInvalidException;
+namespace Xaamin\Jwt\Validation;
+
+use Xaamin\Jwt\Support\Date;
+use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Exceptions\TokenExpiredException;
+use Xaamin\Jwt\Exceptions\TokenInvalidException;
+use Xaamin\Jwt\Exceptions\TokenBeforeValidException;
 
 class PayloadValidation extends Validator
 {
     /**
-     * @var array
+     * @var string[]
      */
     protected $requiredClaims = ['iss', 'iat', 'exp', 'nbf', 'sub', 'jti'];
 
     /**
      * @var int
      */
-    protected $refreshTTL = 20160;
+    protected $refreshTtl = JwtTtl::REFRESH_TTL;
 
     /**
      * @var bool
@@ -25,16 +28,17 @@ class PayloadValidation extends Validator
     /**
      * Run the validations on the payload array.
      *
-     * @param  array  $value
+     * @param array<string,mixed> $value
+     * @param array<string>|array<void> $except
      *
      * @return void
      */
-    public function check($value)
+    public function check($value, array $except = [])
     {
         $this->validateStructure($value);
 
         if (!$this->refreshFlow) {
-            $this->validateTimestamps($value);
+            $this->validateTimestamps($value, $except);
         } else {
             $this->validateRefresh($value);
         }
@@ -44,16 +48,16 @@ class PayloadValidation extends Validator
      * Ensure the payload contains the required claims and
      * the claims have the relevant type.
      *
-     * @param  array  $payload
+     * @param array<string,mixed> $payload
      *
-     * @throws \Xaamin\JWT\Exceptions\TokenInvalidException
+     * @throws TokenInvalidException
      *
      * @return bool
      */
     protected function validateStructure(array $payload)
     {
         if (count(array_diff($this->requiredClaims, array_keys($payload))) !== 0) {
-            throw new TokenInvalidException('JWT payload does not contain the required claims');
+            throw new TokenInvalidException('Jwt payload does not contain the required claims');
         }
 
         return true;
@@ -62,24 +66,26 @@ class PayloadValidation extends Validator
     /**
      * Validate the payload timestamps.
      *
-     * @param  array  $payload
+     * @param array<string,mixed> $payload
+     * @param array<string>|array<void> $except
      *
-     * @throws \Xaamin\JWT\Exceptions\TokenExpiredException
-     * @throws \Xaamin\JWT\Exceptions\TokenInvalidException
+     * @throws TokenExpiredException
+     * @throws TokenInvalidException
+     * @throws TokenBeforeValidException
      *
      * @return bool
      */
-    protected function validateTimestamps(array $payload)
+    protected function validateTimestamps(array $payload, array $except = [])
     {
-        if (isset($payload['nbf']) and Date::isFuture($payload['nbf'])) {
-            throw new TokenInvalidException('Not Before (nbf) timestamp cannot be in the future');
+        if (!in_array('nbf', $except) && isset($payload['nbf']) && Date::isFuture(intval($payload['nbf']))) {
+            throw new TokenBeforeValidException('Not Before (nbf) timestamp cannot be in the future');
         }
 
-        if (isset($payload['iat']) and Date::isFuture($payload['iat'])) {
-            throw new TokenInvalidException('Issued At (iat) timestamp cannot be in the future');
+        if (!in_array('iat', $except) && isset($payload['iat']) && Date::isFuture(intval($payload['iat']))) {
+            throw new TokenBeforeValidException('Issued At (iat) timestamp cannot be in the future');
         }
 
-        if (isset($payload['exp']) and Date::isPast($payload['exp'])) {
+        if (!in_array('exp', $except) && isset($payload['exp']) && Date::isPast(intval($payload['exp']))) {
             throw new TokenExpiredException('Token has expired');
         }
 
@@ -89,19 +95,19 @@ class PayloadValidation extends Validator
     /**
      * Check the token in the refresh flow context.
      *
-     * @param  array  $payload
+     * @param array<string,mixed> $payload
      *
-     * @throws \Xaamin\JWT\Exceptions\TokenExpiredException
+     * @throws TokenExpiredException
      *
      * @return bool
      */
     protected function validateRefresh(array $payload)
     {
-        if ($this->refreshTTL === null) {
+        if ($this->refreshTtl === null) {
             return true;
         }
 
-        if (isset($payload['iat']) && Date::isPast($payload['iat'] + $this->refreshTTL * 60)) {
+        if (isset($payload['iat']) && Date::isPast(intval($payload['iat']) + $this->refreshTtl * 60)) {
             throw new TokenExpiredException('Token has expired and can no longer be refreshed');
         }
 
@@ -111,7 +117,7 @@ class PayloadValidation extends Validator
     /**
      * Sets the required claims.
      *
-     * @param  array  $claims
+     * @param array<string> $claims
      *
      * @return $this
      */
@@ -125,21 +131,21 @@ class PayloadValidation extends Validator
     /**
      * Set the refresh ttl.
      *
-     * @param  int  $ttl
+     * @param int $ttl
      *
      * @return $this
      */
-    public function setRefreshTTL($ttl)
+    public function setRefreshTtl($ttl)
     {
-        $this->refreshTTL = $ttl;
-        
+        $this->refreshTtl = $ttl;
+
         return $this;
     }
 
     /**
      * Set the refresh flow flag.
      *
-     * @param  bool  $refreshFlow
+     * @param bool $refreshFlow
      *
      * @return $this
      */

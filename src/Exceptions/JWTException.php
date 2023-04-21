@@ -1,9 +1,9 @@
 <?php
-namespace Xaamin\JWT\Exceptions;
+
+namespace Xaamin\Jwt\Exceptions;
 
 use Exception;
 
-class JWTException extends Exception 
+class JwtException extends Exception
 {
-
 }

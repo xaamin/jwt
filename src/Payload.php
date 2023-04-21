@@ -1,46 +1,78 @@
 <?php
-namespace Xaamin\JWT;
+
+namespace Xaamin\Jwt;
 
 use Countable;
 use ArrayAccess;
-use Xaamin\JWT\Validation\PayloadValidation;
+use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Exceptions\PayloadException;
+use Xaamin\Jwt\Validation\PayloadValidation;
 
+/**
+ * @implements ArrayAccess<string,mixed>
+ */
 class Payload implements Countable, ArrayAccess
 {
     /**
      * Claims in payload
-     * 
-     * @var array
+     *
+     * @var array<string,mixed>
      */
-	protected $claims;
+    protected $claims;
+
+    /**
+     * Payload validator
+     *
+     * @var PayloadValidation
+     */
+    protected $validator;
 
     /**
      * Constructor
-     * 
-     * @param array             $claims
-     * @param PayloadValidation $validation
-     * @param boolean           $refreshFlow
+     *
+     * @param array<string,mixed> $claims
+     * @param boolean $refreshFlow
+     * @param int|null $refreshTtl
+     * @param PayloadValidation|null $validator
      */
-	public function __construct(array $claims, PayloadValidation $validation, $refreshFlow = false)
-	{
-        $validation = $validation ? : new PayloadValidation;
+    public function __construct(
+        array $claims,
+        $refreshFlow = false,
+        $refreshTtl = JwtTtl::REFRESH_TTL,
+        PayloadValidation $validator = null
+    ) {
+        $this->validator = $validator ?: new PayloadValidation();
 
-		$validation->setRefreshFlow($refreshFlow)->check($claims);
+        $refreshTtl && $this->validator->setRefreshTtl($refreshTtl);
 
-		$this->claims = $claims;
-	}
+        $this->validator->setRefreshFlow($refreshFlow);
+
+        $this->claims = $claims;
+    }
+
+    /**
+     * Check against validations
+     *
+     * @param array<string>|array<void> $except
+     *
+     * @return Payload
+     */
+    public function check(array $except = [])
+    {
+        $this->validator->check($this->claims, $except);
+
+        return $this;
+    }
 
     /**
      * Get the payload.
      *
-     * @param  mixed  $claim
+     * @param string|string[]|null $claim
      *
      * @return mixed
      */
     public function get($claim = null)
     {
-        $claim = value($claim);
-
         if ($claim) {
             if (is_array($claim)) {
                 return array_map([$this, 'get'], $claim);
@@ -55,6 +87,8 @@ class Payload implements Countable, ArrayAccess
     /**
      * Determine whether the payload has the claim.
      *
+     * @param string $claim
+     *
      * @return bool
      */
     public function has($claim)
@@ -65,7 +99,7 @@ class Payload implements Countable, ArrayAccess
     /**
      * Get the array of claims.
      *
-     * @return array
+     * @return array<string,mixed>
      */
     public function toArray()
     {
@@ -75,7 +109,7 @@ class Payload implements Countable, ArrayAccess
     /**
      * Convert the object into something JSON serializable.
      *
-     * @return array
+     * @return array<string,mixed>
      */
     public function jsonSerialize()
     {
@@ -85,13 +119,16 @@ class Payload implements Countable, ArrayAccess
     /**
      * Get the payload as JSON.
      *
-     * @param  int  $options
+     * @param int $options
      *
      * @return string
      */
     public function toJson($options = JSON_UNESCAPED_SLASHES)
     {
-        return json_encode($this->jsonSerialize(), $options);
+        /** @var string */
+        $decoded = json_encode($this->jsonSerialize(), $options);
+
+        return $decoded;
     }
 
     /**
@@ -106,11 +143,11 @@ class Payload implements Countable, ArrayAccess
     /**
      * Determine if an item exists at an offset.
      *
-     * @param  mixed  $key
+     * @param string $key
      *
      * @return bool
      */
-    public function offsetExists($key)
+    public function offsetExists($key): bool
     {
         return $this->has($key);
     }
@@ -118,11 +155,11 @@ class Payload implements Countable, ArrayAccess
     /**
      * Get an item at a given offset.
      *
-     * @param  mixed  $key
+     * @param string $key
      *
      * @return mixed
      */
-    public function offsetGet($key)
+    public function offsetGet($key): mixed
     {
         return $this->get($key);
     }
@@ -130,12 +167,12 @@ class Payload implements Countable, ArrayAccess
     /**
      * Don't allow changing the payload as it should be immutable.
      *
-     * @param  mixed  $key
-     * @param  mixed  $value
+     * @param string $key
+     * @param mixed  $value
      *
-     * @throws \Xaamin\JWT\Exceptions\PayloadException
+     * @throws PayloadException
      */
-    public function offsetSet($key, $value)
+    public function offsetSet($key, $value): void
     {
         throw new PayloadException('The payload is immutable');
     }
@@ -143,13 +180,13 @@ class Payload implements Countable, ArrayAccess
     /**
      * Don't allow changing the payload as it should be immutable.
      *
-     * @param  string  $key
+     * @param string $key
      *
-     * @throws \Xaamin\JWT\Exceptions\PayloadException
+     * @throws PayloadException
      *
      * @return void
      */
-    public function offsetUnset($key)
+    public function offsetUnset($key): void
     {
         throw new PayloadException('The payload is immutable');
     }
@@ -159,7 +196,7 @@ class Payload implements Countable, ArrayAccess
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->toArray());
     }
@@ -167,7 +204,7 @@ class Payload implements Countable, ArrayAccess
     /**
      * Invoke the Payload as a callable function.
      *
-     * @param  mixed  $claim
+     * @param string|string[]|null $claim
      *
      * @return mixed
      */

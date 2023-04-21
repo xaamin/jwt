@@ -1,16 +1,17 @@
 <?php
-namespace Xaamin\JWT\Validation;
 
-use Xaamin\JWT\Support\Base64;
-use Xaamin\JWT\Exceptions\JWTException;
-use Xaamin\JWT\Exceptions\TokenInvalidException;
+namespace Xaamin\Jwt\Validation;
+
+use Xaamin\Jwt\Support\Base64;
+use Xaamin\Jwt\Exceptions\JwtException;
+use Xaamin\Jwt\Exceptions\TokenInvalidException;
 
 class TokenValidation extends Validator
 {
-	/**
+    /**
      * Check the structure of the token.
      *
-     * @param  string  $value
+     * @param string $value
      *
      * @return void
      */
@@ -25,15 +26,15 @@ class TokenValidation extends Validator
 
     /**
      * Validates token structure
-     * 
-     * @param  string   $parts
-     * @param  string   $token
-     * 
-     * @throws \Xaamin\JWT\Exceptions\TokenInvalidException
-     * 
+     *
+     * @param string[] $parts
+     * @param string   $token
+     *
+     * @throws TokenInvalidException
+     *
      * @return bool
      */
-    protected function validateStructure($parts, $token)
+    protected function validateStructure(array $parts, $token)
     {
         if (count($parts) !== 3) {
             throw new TokenInvalidException('Wrong number of parts for token');
@@ -50,10 +51,10 @@ class TokenValidation extends Validator
 
     /**
      * Validates that token has 3 parts and is valid
-     * 
-     * @param  array  $parts
      *
-     * @throws \Xaamin\JWT\Exceptions\JWTException
+     * @param string[] $parts
+     *
+     * @throws JwtException
      *
      * @return bool
      */
@@ -65,11 +66,15 @@ class TokenValidation extends Validator
         $payload = json_decode(Base64::decode($payloadB64));
 
         if (!$header) {
-            throw new JWTException('Invalid header segment encoding');
+            throw new JwtException('Invalid header segment encoding');
         }
 
         if (!$payload) {
-            throw new JWTException('Invalid payload segment encoding');
+            throw new JwtException('Invalid payload segment encoding');
+        }
+
+        if (!$cryptoB64) {
+            throw new JwtException('Invalid encrypted segment encoding');
         }
 
         return true;

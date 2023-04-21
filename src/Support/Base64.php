@@ -1,13 +1,14 @@
 <?php
-namespace Xaamin\JWT\Support;
+
+namespace Xaamin\Jwt\Support;
 
 class Base64
 {
     /**
      * Encodes string to Base64
-     * 
-     * @param  string $value
-     * 
+     *
+     * @param string $value
+     *
      * @return string
      */
     public static function encode($value)
@@ -20,7 +21,7 @@ class Base64
 
     /**
      * Decodes a string from Base64
-     * 
+     *
      * @param  string $B64
      * @return string
      */
