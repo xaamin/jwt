@@ -30,7 +30,7 @@ class JwtHmTest extends TestCase
         $this->assertInstanceOf(Token::class, $token);
     }
 
-    public function testCreateTokenHS256Successfully(): void
+    public function testCreateTokenHs256Successfully(): void
     {
         Jwt::setConfig(['algorithm' => 'HS256'] + $this->config);
 
@@ -39,7 +39,7 @@ class JwtHmTest extends TestCase
         $this->assertInstanceOf(Token::class, $token);
     }
 
-    public function testCreateTokenHS384Successfully(): void
+    public function testCreateTokenHs384Successfully(): void
     {
         Jwt::setConfig(['algorithm' => 'HS384'] + $this->config);
 
@@ -48,7 +48,7 @@ class JwtHmTest extends TestCase
         $this->assertInstanceOf(Token::class, $token);
     }
 
-    public function testCreateTokenHS512Successfully(): void
+    public function testCreateTokenHs512Successfully(): void
     {
         Jwt::setConfig(['algorithm' => 'HS512'] + $this->config);
 
