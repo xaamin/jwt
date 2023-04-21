@@ -8,13 +8,13 @@ on:
 
 jobs:
   tests:
-    name: PHP [${{ matrix.php }}] - Lumen [${{ matrix.lumen }}]
+    name: PHP [${{ matrix.php }}]
     runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: true
       matrix:
-        php: [7.0, 7.1, 7.2, 7.3, 7.4, 8.0, 8.1, 8.2]
+        php: [7.2, 7.3, 7.4, 8.0, 8.1, 8.2]
 
     steps:
       - name: Checkout code
@@ -30,4 +30,4 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run test suite
-        run: vendor/bin/phpunit --testdox
+        run: vendor/bin/phpunit --testdox --verbose
