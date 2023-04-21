@@ -1,0 +1,11 @@
+parameters:
+    level: max
+    paths:
+        - src/
+        - tests/
+    ignoreErrors:
+    excludePaths:
+        - src/Facades/*
+        - src/Providers/*
+        - src/Middleware/*
+
