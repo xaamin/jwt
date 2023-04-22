@@ -30,10 +30,14 @@ class JwtServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__ . '/../config/jwt.php', 'jwt');
+
         $this->app->singleton(Jwt::class, function ($app) {
             $passphrase = config('jwt.passphrase');
             $algo = config('jwt.algorithm');
-            $keys = config('jwt.keys');
+            $keys = array_filter(config('jwt.keys'));
+
+            $passphrase = !empty($keys) && !empty($keys['passphrase']) ? $keys['passphrase'] : $passphrase;
 
             $factory = new Factory();
             $signer = new Native($passphrase, $algo, $keys);

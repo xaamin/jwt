@@ -5,17 +5,17 @@ return [
      * Specify the hashing algorithm that will be used to sign the token.
      *
      * Symmetric Algorithms:
-     *  	HS256, HS384 & HS512 will use 'passphrase'.
+     *  	HS256, HS384 & HS512 will use 'secret'.
      *
      * Asymmetric Algorithms:
-     * 		RS256, RS384 & RS512 will use 'keys' + passphrase if required
+     * 		RS256, RS384 & RS512 will use 'keys'
      */
 	'algorithm' => 'HS512',
 
    	/**
-   	 * It will be used to sign your tokens. Used for Symmetric algorithms or RS with passphrase.
+     * It will be used to sign your tokens, used for Symmetric algorithms.
    	 */
-    'passphrase' => null,
+    'secret' => null,
 
     /**
      * When checking nbf, iat or expiration times, we want to provide some extra leeway time
@@ -55,6 +55,11 @@ return [
          * Path or string of your private key.
          */
         'private' => null,
+
+        /*
+         * The passphrase for your private key. Can be null if none set.
+         */
+        'passphrase' => null,
     ],
 
     /**

@@ -50,6 +50,8 @@ class Jwt extends Facade
         /** @var array<string,string> */
         $keys = static::get($config, 'keys') ?? [];
 
+        $passphrase = !empty($keys) && !empty($keys['passphrase']) ? $keys['passphrase'] : $passphrase;
+
         $factory = new Factory();
         $signer = new Native($passphrase, $algo, $keys);
 

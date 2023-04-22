@@ -205,7 +205,7 @@ class Jwt
     /**
      * Set new Signer strategy
      *
-     * @param Contracts\Signer $signer
+     * @param Signer $signer
      *
      * @return Jwt
      */
@@ -263,7 +263,7 @@ class Jwt
      *
      * @param string $issuer
      *
-     * @return $this
+     * @return Jwt
      */
     public function setIssuer($issuer)
     {
