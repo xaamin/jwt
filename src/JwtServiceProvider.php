@@ -6,6 +6,8 @@ use Xaamin\Jwt\Jwt;
 use Xaamin\Jwt\Factory;
 use Xaamin\Jwt\Signer\Native;
 use Illuminate\Support\ServiceProvider;
+use Xaamin\Jwt\Middleware\RefreshTokenMiddleware;
+use Xaamin\Jwt\Middleware\ValidateTokenMiddleware;
 
 class JwtServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,15 @@ class JwtServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/jwt.php' => base_path('config/jwt.php'),
             ], 'jwt-config');
+        } else {
+            if (app() instanceof \Illuminate\Foundation\Application) {
+                // Laravel
+                $router = $this->app['router'];
+                $router->aliasMiddleware('jwt.check', ValidateTokenMiddleware::class);
+                $router->aliasMiddleware('jwt.refresh', RefreshTokenMiddleware::class);
+            } else {
+                // Lumen
+            }
         }
     }
 

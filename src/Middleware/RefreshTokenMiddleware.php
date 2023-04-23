@@ -1,13 +1,13 @@
 <?php
 
-namespace Xaamin\Providers\Middleware;
+namespace Xaamin\Jwt\Middleware;
 
 use Closure;
 use Xaamin\Jwt\Jwt;
 use Xaamin\Jwt\Exceptions\JwtException;
 use Xaamin\Jwt\Exceptions\TokenExpiredException;
 
-class RefreshToken
+class RefreshTokenMiddleware
 {
     /**
      * Jwt instance
@@ -31,11 +31,12 @@ class RefreshToken
     public function handle($request, Closure $next)
     {
         $jwt = $request->header('Authorization');
-        $token = '';
-        $error = '';
+        $token = null;
+        $error = null;
         $code = 'jwt_invalid_token';
 
         try {
+            throw new TokenExpiredException('Invalid token');
             $this->jwt->checkOrFail($jwt);
         } catch (TokenExpiredException $e) {
             try {
@@ -63,8 +64,10 @@ class RefreshToken
 
         $response = $next($request);
 
-        // Send the refreshed token back to the client
-        $response->headers->set('Authorization', 'Bearer ' . $token);
+        if ($token) {
+            // Send the refreshed token back to the client
+            $response->headers->set('Authorization', 'Bearer ' . $token);
+        }
 
         return $response;
     }

@@ -7,7 +7,7 @@ use Xaamin\Jwt\Jwt;
 use Xaamin\Jwt\Exceptions\JwtException;
 use Xaamin\Jwt\Exceptions\TokenExpiredException;
 
-class TokenValidation
+class ValidateTokenMiddleware
 {
     /**
      * Jwt instance
