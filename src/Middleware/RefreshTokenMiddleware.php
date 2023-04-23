@@ -41,7 +41,7 @@ class RefreshTokenMiddleware
         } catch (TokenExpiredException $e) {
             try {
                 $token = $this->jwt->refresh($jwt)->get();
-                // Set token for current request to pass jwt.auth middleware
+                // Set token for current request
                 $request->headers->set('Authorization', 'Bearer ' . $token);
             } catch (TokenExpiredException $e) {
                 $error = $e->getMessage();
