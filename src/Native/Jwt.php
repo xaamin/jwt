@@ -43,11 +43,14 @@ class Jwt extends Facade
             throw new UnexpectedValueException('No config provided');
         }
 
+        /** @var string[] */
         $requiredClaims = static::get($config, 'required_claims', []);
         $passphrase = strval(static::get($config, 'passphrase'));
         $algo = strval(static::get($config, 'algorithm'));
         $leeway = intval(static::get($config, 'refresh_ttl'));
+        /** @var string|null */
         $issuer = static::get($config, 'issuer');
+        /** @var int|null */
         $ttl = static::get($config, 'ttl');
         /** @var int|null */
         $refreshTtl = static::get($config, 'refresh_ttl');

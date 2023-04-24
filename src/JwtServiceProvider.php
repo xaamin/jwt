@@ -44,10 +44,12 @@ class JwtServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/jwt.php', 'jwt');
 
         $this->app->singleton(Jwt::class, function ($app) {
+            /** @var string[] */
             $requiredClaims = config('jwt.required_claims', []);
             $passphrase = strval(config('jwt.passphrase'));
             $algo = strval(config('jwt.algorithm'));
             $leeway = intval(config('jwt.refresh_ttl'));
+            /** @var string|null */
             $issuer = config('jwt.issuer');
             /** @var int|null */
             $ttl = config('jwt.ttl');
