@@ -18,6 +18,11 @@ return [
     'secret' => null,
 
     /**
+     * Issuer used for iss claim, if not provided it will use the hostname
+     */
+    'issuer' => null,
+
+    /**
      * When checking nbf, iat or expiration times, we want to provide some extra leeway time
      * to account for clock skew expressed in seconds.
      */
