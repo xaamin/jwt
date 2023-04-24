@@ -44,16 +44,32 @@ class JwtServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/jwt.php', 'jwt');
 
         $this->app->singleton(Jwt::class, function ($app) {
-            $passphrase = config('jwt.passphrase');
-            $algo = config('jwt.algorithm');
-            $keys = array_filter(config('jwt.keys'));
+            $requiredClaims = config('jwt.required_claims', []);
+            $passphrase = strval(config('jwt.passphrase'));
+            $algo = strval(config('jwt.algorithm'));
+            $leeway = intval(config('jwt.refresh_ttl'));
+            $issuer = config('jwt.issuer');
+            /** @var int|null */
+            $ttl = config('jwt.ttl');
+            /** @var int|null */
+            $refreshTtl = config('jwt.refresh_ttl');
+            /** @var array<string,string> */
+            $keys = config('jwt.keys') ?? [];
 
             $passphrase = !empty($keys) && !empty($keys['passphrase']) ? $keys['passphrase'] : $passphrase;
 
             $factory = new Factory();
             $signer = new Native($passphrase, $algo, $keys);
 
-            return new Jwt($signer, $factory);
+            $jwt = new Jwt($signer, $factory);
+
+            $jwt->setTtl($ttl);
+            $jwt->setLeeway($leeway);
+            $jwt->setIssuer($issuer);
+            $jwt->setRefreshTtl($refreshTtl);
+            $jwt->setRequiredClaims($requiredClaims);
+
+            return $jwt;
         });
     }
 }

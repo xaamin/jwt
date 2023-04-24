@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Xaamin\Jwt\Jwt setLeeway(int $seconds)
  * @method static \Xaamin\Jwt\Jwt setTtl(int|null $minutes)
  * @method static \Xaamin\Jwt\Jwt setRefreshTtl(int|null $minutes)
+ * @method static \Xaamin\Jwt\Jwt setRequiredClaims(array $claims)
  */
 class Jwt extends Facade
 {

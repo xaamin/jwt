@@ -132,6 +132,20 @@ class Payload implements Countable, ArrayAccess
     }
 
     /**
+     * Sets the required claims.
+     *
+     * @param string[] $claims
+     *
+     * @return Payload
+     */
+    public function setRequiredClaims(array $claims)
+    {
+        $this->validator->setRequiredClaims($claims);
+
+        return $this;
+    }
+
+    /**
      * Get the payload as a string.
      *
      * @return string

@@ -119,7 +119,7 @@ class PayloadValidation extends Validator
      *
      * @param array<string> $claims
      *
-     * @return $this
+     * @return PayloadValidation
      */
     public function setRequiredClaims(array $claims)
     {
@@ -133,7 +133,7 @@ class PayloadValidation extends Validator
      *
      * @param int $ttl
      *
-     * @return $this
+     * @return PayloadValidation
      */
     public function setRefreshTtl($ttl)
     {
@@ -147,7 +147,7 @@ class PayloadValidation extends Validator
      *
      * @param bool $refreshFlow
      *
-     * @return $this
+     * @return PayloadValidation
      */
     public function setRefreshFlow($refreshFlow = true)
     {

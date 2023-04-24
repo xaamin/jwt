@@ -233,7 +233,7 @@ class Jwt
     /**
      * Set the token ttl
      *
-     * @param int $minutes
+     * @param int|null $minutes
      *
      * @return Jwt
      */
@@ -261,13 +261,27 @@ class Jwt
     /**
      * Sets the issuer.
      *
-     * @param string $issuer
+     * @param string|null $issuer
      *
      * @return Jwt
      */
     public function setIssuer($issuer)
     {
         $this->factory->setIssuer($issuer);
+
+        return $this;
+    }
+
+    /**
+     * Sets the required claims.
+     *
+     * @param array<string> $claims
+     *
+     * @return Jwt
+     */
+    public function setRequiredClaims(array $claims)
+    {
+        $this->factory->setRequiredClaims($claims);
 
         return $this;
     }

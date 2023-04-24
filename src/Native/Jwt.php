@@ -19,6 +19,7 @@ use Xaamin\Jwt\Jwt as JwtBase;
  * @method static \Xaamin\Jwt\Jwt setLeeway(int $seconds)
  * @method static \Xaamin\Jwt\Jwt setTtl(int|null $minutes)
  * @method static \Xaamin\Jwt\Jwt setRefreshTtl(int|null $minutes)
+ * @method static \Xaamin\Jwt\Jwt setRequiredClaims(array $claims)
  */
 class Jwt extends Facade
 {
@@ -42,9 +43,12 @@ class Jwt extends Facade
             throw new UnexpectedValueException('No config provided');
         }
 
+        $requiredClaims = static::get($config, 'required_claims', []);
         $passphrase = strval(static::get($config, 'passphrase'));
         $algo = strval(static::get($config, 'algorithm'));
-        $ttl = intval(static::get($config, 'ttl'));
+        $leeway = intval(static::get($config, 'refresh_ttl'));
+        $issuer = static::get($config, 'issuer');
+        $ttl = static::get($config, 'ttl');
         /** @var int|null */
         $refreshTtl = static::get($config, 'refresh_ttl');
         /** @var array<string,string> */
@@ -58,7 +62,10 @@ class Jwt extends Facade
         $jwt = new JwtBase($signer, $factory);
 
         $jwt->setTtl($ttl);
+        $jwt->setLeeway($leeway);
+        $jwt->setIssuer($issuer);
         $jwt->setRefreshTtl($refreshTtl);
+        $jwt->setRequiredClaims($requiredClaims);
 
         return $jwt;
     }

@@ -17,7 +17,7 @@ class Factory
     /**
      * The issuer
      *
-     * @var string
+     * @var string|null
      */
     protected $issuer = null;
 
@@ -61,7 +61,9 @@ class Factory
     {
         $claims = $this->buildClaims();
 
-        return (new Payload($claims, false))->check($this->except);
+        return (new Payload($claims, false))
+            ->setRequiredClaims($this->requiredClaims)
+            ->check($this->except);
     }
 
     /**
@@ -141,6 +143,10 @@ class Factory
 
         // Remove the exp claim if it exists and the ttl is null
         if ($this->ttl === null && $key = array_search('exp', $this->defaultClaims)) {
+            if ($key = array_search('exp', $this->requiredClaims)) {
+                unset($this->requiredClaims[$key]);
+            }
+
             unset($this->defaultClaims[$key]);
         }
 
@@ -176,7 +182,7 @@ class Factory
     /**
      * Sets the issuer.
      *
-     * @param string $issuer
+     * @param string|null $issuer
      *
      * @return Factory
      */
