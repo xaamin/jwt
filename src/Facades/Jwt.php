@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool check(string $token)
  * @method static bool checkOrFail(string $token)
  * @method static \Xaamin\Jwt\Jwt with(string|null $secret, string $algorithm = 'HS512', array $keys = [])
- * @method static \Xaamin\Jwt\Jwt setSigner(\Xaamin\Jwt\Contracts\Signer $issuer)
+ * @method static \Xaamin\Jwt\Jwt setSigner(\Xaamin\Jwt\Contracts\Signer $signer)
  * @method static \Xaamin\Jwt\Jwt setIssuer(string $issuer)
  * @method static \Xaamin\Jwt\Jwt setLeeway(int $seconds)
  * @method static \Xaamin\Jwt\Jwt setTtl(int|null $minutes)
