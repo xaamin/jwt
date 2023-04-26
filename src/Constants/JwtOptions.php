@@ -8,5 +8,6 @@ class JwtOptions
     public const TTL = 60;
     public const REFRESH_TTL = 20160;
 
+    /** @var string[] */
     public static $requiredClaims = ['iss', 'iat', 'exp', 'nbf', 'sub', 'jti'];
 }
