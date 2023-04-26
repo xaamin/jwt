@@ -143,11 +143,11 @@ class Factory
 
         // Remove the exp claim if it exists and the ttl is null
         if ($this->ttl === null && $key = array_search('exp', $this->defaultClaims)) {
+            unset($this->defaultClaims[$key]);
+
             if ($key = array_search('exp', $this->requiredClaims)) {
                 unset($this->requiredClaims[$key]);
             }
-
-            unset($this->defaultClaims[$key]);
         }
 
         // Add the default claims
@@ -313,6 +313,16 @@ class Factory
     public function getDefaultClaims()
     {
         return $this->defaultClaims;
+    }
+
+    /**
+     * Get the required claims.
+     *
+     * @return string[]
+     */
+    public function getRequiredClaims()
+    {
+        return $this->requiredClaims;
     }
 
     /**

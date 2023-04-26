@@ -156,9 +156,11 @@ class Jwt
      */
     public function refresh($jwt)
     {
+        $except = $this->getExceptClaims();
         $claims = $this->decode($jwt)->getPayload();
-
-        $payload = (new Payload($claims, true, $this->refreshTtl))->check();
+        $payload = (new Payload($claims, true, $this->refreshTtl))
+            ->setRequiredClaims($this->factory->getRequiredClaims())
+            ->check($except);
 
         /** @var array<string,mixed> */
         $payload = $payload->get();
@@ -197,9 +199,12 @@ class Jwt
      */
     public function checkOrFail($jwt)
     {
+        $except = $this->getExceptClaims();
         $claims = $this->decode($jwt)->getPayload();
 
-        return (new Payload($claims))->check();
+        return (new Payload($claims))
+            ->setRequiredClaims($this->factory->getRequiredClaims())
+            ->check($except);
     }
 
     /**
@@ -284,6 +289,29 @@ class Jwt
         $this->factory->setRequiredClaims($claims);
 
         return $this;
+    }
+
+    /**
+     * Returns the claims to be ignored on validations
+     *
+     * @return string[]|array<void>
+     */
+    protected function getExceptClaims()
+    {
+        $except = [];
+        $requiredClaims = $this->factory->getRequiredClaims();
+
+        if ($this->factory->getTtl() === null) {
+            $except[] = 'exp';
+
+            if ($key = array_search('exp', $requiredClaims)) {
+                unset($requiredClaims[$key]);
+
+                $this->factory->setRequiredClaims($requiredClaims);
+            }
+        }
+
+        return $except;
     }
 
     /**
