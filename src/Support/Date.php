@@ -4,7 +4,7 @@ namespace Xaamin\Jwt\Support;
 
 use DateTime;
 use DateTimeZone;
-use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Constants\JwtOptions;
 
 class Date
 {
@@ -13,7 +13,7 @@ class Date
      *
      * @var int
      */
-    public static $leeway = JwtTtl::LEEWAY;
+    public static $leeway = JwtOptions::LEEWAY;
 
     /**
      * Get the date instance for the current time.

@@ -5,14 +5,14 @@ namespace Xaamin\Jwt;
 use Xaamin\Jwt\Payload;
 use Xaamin\Jwt\Support\Str;
 use Xaamin\Jwt\Support\Date;
-use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Constants\JwtOptions;
 
 class Factory
 {
     /**
      * @var int|null
      */
-    protected $ttl = JwtTtl::TTL;
+    protected $ttl = JwtOptions::TTL;
 
     /**
      * The issuer
@@ -34,7 +34,7 @@ class Factory
     /**
      * Array of claims to ignore
      *
-     * @var array<string>
+     * @var string[]
      */
     protected $except = [];
 
@@ -46,13 +46,6 @@ class Factory
     protected $customClaims = [];
 
     /**
-     * Required claims.
-     *
-     * @var string[]
-     */
-    protected $requiredClaims = [];
-
-    /**
      * Create the Payload instance.
      *
      * @return Payload
@@ -61,9 +54,7 @@ class Factory
     {
         $claims = $this->buildClaims();
 
-        return (new Payload($claims, false))
-            ->setRequiredClaims($this->requiredClaims)
-            ->check($this->except);
+        return (new Payload($claims, false))->check($this->except);
     }
 
     /**
@@ -174,7 +165,7 @@ class Factory
      */
     public function setRequiredClaims(array $claims)
     {
-        $this->requiredClaims = $claims;
+        JwtOptions::$requiredClaims = $claims;
 
         return $this;
     }
@@ -322,7 +313,7 @@ class Factory
      */
     public function getRequiredClaims()
     {
-        return $this->requiredClaims;
+        return JwtOptions::$requiredClaims;
     }
 
     /**

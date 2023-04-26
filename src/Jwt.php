@@ -7,7 +7,7 @@ use Xaamin\Jwt\Token;
 use Xaamin\Jwt\Support\Date;
 use Xaamin\Jwt\Signer\Native;
 use Xaamin\Jwt\Support\Base64;
-use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Constants\JwtOptions;
 use Xaamin\Jwt\Contracts\Signer;
 use Xaamin\Jwt\Exceptions\JwtException;
 use Xaamin\Jwt\Exceptions\TokenInvalidException;
@@ -34,7 +34,14 @@ class Jwt
      *
      * @var int|null
      */
-    protected $refreshTtl = JwtTtl::REFRESH_TTL;
+    protected $refreshTtl = JwtOptions::REFRESH_TTL;
+
+    /**
+     * Required claims.
+     *
+     * @var string[]
+     */
+    protected $requiredClaims = [];
 
     /**
      * Constructor
@@ -80,7 +87,7 @@ class Jwt
         }
 
         $header = [
-            'typ' => 'Jwt',
+            'typ' => 'JWT',
             'alg' => $this->signer->getAlgorithm()
         ];
 
@@ -158,9 +165,7 @@ class Jwt
     {
         $except = $this->getExceptClaims();
         $claims = $this->decode($jwt)->getPayload();
-        $payload = (new Payload($claims, true, $this->refreshTtl))
-            ->setRequiredClaims($this->factory->getRequiredClaims())
-            ->check($except);
+        $payload = (new Payload($claims, true, $this->refreshTtl))->check($except);
 
         /** @var array<string,mixed> */
         $payload = $payload->get();
@@ -202,9 +207,7 @@ class Jwt
         $except = $this->getExceptClaims();
         $claims = $this->decode($jwt)->getPayload();
 
-        return (new Payload($claims))
-            ->setRequiredClaims($this->factory->getRequiredClaims())
-            ->check($except);
+        return (new Payload($claims))->check($except);
     }
 
     /**
@@ -280,15 +283,25 @@ class Jwt
     /**
      * Sets the required claims.
      *
-     * @param array<string> $claims
+     * @param string[] $claims
      *
      * @return Jwt
      */
     public function setRequiredClaims(array $claims)
     {
-        $this->factory->setRequiredClaims($claims);
+        $this->requiredClaims = $claims;
 
         return $this;
+    }
+
+    /**
+     * Sets the required claims.
+     *
+     * @return string[]
+     */
+    public function getRequiredClaims()
+    {
+        return $this->requiredClaims;
     }
 
     /**
@@ -299,7 +312,7 @@ class Jwt
     protected function getExceptClaims()
     {
         $except = [];
-        $requiredClaims = $this->factory->getRequiredClaims();
+        $requiredClaims = $this->requiredClaims;
 
         if ($this->factory->getTtl() === null) {
             $except[] = 'exp';
@@ -317,7 +330,7 @@ class Jwt
     /**
      * Parse token from header
      *
-     * @param  string $token
+     * @param string $token
      * @return string
      */
     protected function parse($token)

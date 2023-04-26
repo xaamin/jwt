@@ -3,7 +3,7 @@
 namespace Xaamin\Jwt\Validation;
 
 use Xaamin\Jwt\Support\Date;
-use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Constants\JwtOptions;
 use Xaamin\Jwt\Exceptions\TokenExpiredException;
 use Xaamin\Jwt\Exceptions\TokenInvalidException;
 use Xaamin\Jwt\Exceptions\TokenBeforeValidException;
@@ -11,14 +11,9 @@ use Xaamin\Jwt\Exceptions\TokenBeforeValidException;
 class PayloadValidation extends Validator
 {
     /**
-     * @var string[]
-     */
-    protected $requiredClaims = ['iss', 'iat', 'exp', 'nbf', 'sub', 'jti'];
-
-    /**
      * @var int
      */
-    protected $refreshTtl = JwtTtl::REFRESH_TTL;
+    protected $refreshTtl = JwtOptions::REFRESH_TTL;
 
     /**
      * @var bool
@@ -29,7 +24,7 @@ class PayloadValidation extends Validator
      * Run the validations on the payload array.
      *
      * @param array<string,mixed> $value
-     * @param array<string>|array<void> $except
+     * @param string[]|array<void> $except
      *
      * @return void
      */
@@ -56,7 +51,7 @@ class PayloadValidation extends Validator
      */
     protected function validateStructure(array $payload)
     {
-        if (count(array_diff($this->requiredClaims, array_keys($payload))) !== 0) {
+        if (count(array_diff(JwtOptions::$requiredClaims, array_keys($payload))) !== 0) {
             throw new TokenInvalidException('Jwt payload does not contain the required claims');
         }
 
@@ -67,7 +62,7 @@ class PayloadValidation extends Validator
      * Validate the payload timestamps.
      *
      * @param array<string,mixed> $payload
-     * @param array<string>|array<void> $except
+     * @param string[]|array<void> $except
      *
      * @throws TokenExpiredException
      * @throws TokenInvalidException
@@ -112,20 +107,6 @@ class PayloadValidation extends Validator
         }
 
         return true;
-    }
-
-    /**
-     * Sets the required claims.
-     *
-     * @param array<string> $claims
-     *
-     * @return PayloadValidation
-     */
-    public function setRequiredClaims(array $claims)
-    {
-        $this->requiredClaims = $claims;
-
-        return $this;
     }
 
     /**

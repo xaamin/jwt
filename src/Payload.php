@@ -4,7 +4,7 @@ namespace Xaamin\Jwt;
 
 use Countable;
 use ArrayAccess;
-use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Constants\JwtOptions;
 use Xaamin\Jwt\Exceptions\PayloadException;
 use Xaamin\Jwt\Validation\PayloadValidation;
 
@@ -38,7 +38,7 @@ class Payload implements Countable, ArrayAccess
     public function __construct(
         array $claims,
         $refreshFlow = false,
-        $refreshTtl = JwtTtl::REFRESH_TTL,
+        $refreshTtl = JwtOptions::REFRESH_TTL,
         PayloadValidation $validator = null
     ) {
         $this->validator = $validator ?: new PayloadValidation();
@@ -53,7 +53,7 @@ class Payload implements Countable, ArrayAccess
     /**
      * Check against validations
      *
-     * @param array<string>|array<void> $except
+     * @param string[]|array<void> $except
      *
      * @return Payload
      */
@@ -129,20 +129,6 @@ class Payload implements Countable, ArrayAccess
         $decoded = json_encode($this->jsonSerialize(), $options);
 
         return $decoded;
-    }
-
-    /**
-     * Sets the required claims.
-     *
-     * @param string[] $claims
-     *
-     * @return Payload
-     */
-    public function setRequiredClaims(array $claims)
-    {
-        $this->validator->setRequiredClaims($claims);
-
-        return $this;
     }
 
     /**
