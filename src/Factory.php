@@ -136,9 +136,13 @@ class Factory
         if ($this->ttl === null && $key = array_search('exp', $this->defaultClaims)) {
             unset($this->defaultClaims[$key]);
 
-            if ($key = array_search('exp', $this->requiredClaims)) {
-                unset($this->requiredClaims[$key]);
+            $requiredClaims = JwtOptions::$requiredClaims;
+
+            if ($key = array_search('exp', $requiredClaims)) {
+                unset($requiredClaims[$key]);
             }
+
+            JwtOptions::$requiredClaims = $requiredClaims;
         }
 
         // Add the default claims
