@@ -4,7 +4,7 @@ use Xaamin\Jwt\Token;
 use Xaamin\Jwt\Native\Jwt;
 use Xaamin\Jwt\Support\Str;
 use PHPUnit\Framework\TestCase;
-use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Constants\JwtOptions;
 use Xaamin\Jwt\Exceptions\JwtException;
 use Xaamin\Jwt\Exceptions\TokenExpiredException;
 use Xaamin\Jwt\Exceptions\TokenInvalidException;
@@ -23,7 +23,7 @@ class JwtRefreshTest extends TestCase
         $config['passphrase'] = Str::random(32);
 
         Jwt::setConfig($config);
-        Jwt::setLeeway(JwtTtl::LEEWAY);
+        Jwt::setLeeway(JwtOptions::LEEWAY);
 
         $this->config = $config;
     }

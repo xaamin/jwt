@@ -3,7 +3,7 @@
 use Xaamin\Jwt\Token;
 use Xaamin\Jwt\Native\Jwt;
 use PHPUnit\Framework\TestCase;
-use Xaamin\Jwt\Constants\JwtTtl;
+use Xaamin\Jwt\Constants\JwtOptions;
 
 class JwtRsaTest extends TestCase
 {
@@ -23,7 +23,7 @@ class JwtRsaTest extends TestCase
         $config['keys'] = $keys;
 
         Jwt::setConfig($config);
-        Jwt::setLeeway(JwtTtl::LEEWAY);
+        Jwt::setLeeway(JwtOptions::LEEWAY);
 
         $this->config = $config;
     }
