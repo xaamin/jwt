@@ -10,7 +10,7 @@ return [
      * Asymmetric Algorithms:
      * 		RS256, RS384 & RS512 will use 'keys'
      */
-	'algorithm' => 'HS512',
+	'algorithm' => 'HS256',
 
    	/**
      * It will be used to sign your tokens, used for Symmetric algorithms.
