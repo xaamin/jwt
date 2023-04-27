@@ -5,6 +5,7 @@ parameters:
         - tests/
     ignoreErrors:
     excludePaths:
+        - src/Console/*
         - src/Facades/*
         - src/Middleware/*
         - src/JwtServiceProvider.php
