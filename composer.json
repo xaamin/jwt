@@ -18,7 +18,8 @@
         "ext-openssl": "*"
     },
     "suggest": {
-        "illuminate/support": "To use with Laravel/Lumen"
+        "illuminate/support": "To use with Laravel/Lumen",
+        "phpseclib/phpseclib": "To generate RSA keys to be used for JWT token generation."
     },
     "autoload": {
         "psr-4": {
