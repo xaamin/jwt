@@ -8,25 +8,25 @@ use Illuminate\Console\Command;
 class GenerateSecretCommand extends Command
 {
     /**
-    * The console command signature.
-    *
-    * @var string
-    */
+     * The console command signature.
+     *
+     * @var string
+     */
     protected $signature = 'jwt:secret
         {--f|force : Skip confirmation when overwriting an existing key.}';
 
     /**
-    * The console command description.
-    *
-    * @var string
-    */
+     * The console command description.
+     *
+     * @var string
+     */
     protected $description = 'Set the JWTAuth secret key used to sign the tokens';
 
     /**
-    * Execute the console command.
-    *
-    * @return void
-    */
+     * Execute the console command.
+     *
+     * @return void
+     */
     public function handle()
     {
         $path = base_path('.env');
@@ -41,27 +41,29 @@ class GenerateSecretCommand extends Command
                 return;
             }
 
-            file_put_contents($path, str_replace(
-                'JWT_SECRET=' . $this->laravel['config']['jwt.secret'],
-                'JWT_SECRET=' . $key, file_get_contents($path)
-            ));
-
+            file_put_contents(
+                $path,
+                str_replace(
+                    'JWT_SECRET=' . $this->laravel['config']['jwt.secret'],
+                    'JWT_SECRET=' . $key,
+                    file_get_contents($path)
+                )
+            );
         }
 
         $this->displayKey($key);
     }
 
     /**
-    * Display the key.
-    *
-    * @param  string  $key
-    * @return void
-    */
+     * Display the key.
+     *
+     * @param  string $key
+     * @return void
+     */
     protected function displayKey($key)
     {
         $this->laravel['config']['jwt.secret'] = $key;
 
         $this->info("jwt-auth secret [$key] set successfully.");
     }
-
 }
