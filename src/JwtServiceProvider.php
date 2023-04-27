@@ -6,6 +6,8 @@ use Xaamin\Jwt\Jwt;
 use Xaamin\Jwt\Factory;
 use Xaamin\Jwt\Signer\Native;
 use Illuminate\Support\ServiceProvider;
+use Xaamin\Jwt\Console\GenerateKeysCommand;
+use Xaamin\Jwt\Console\GenerateSecretCommand;
 use Xaamin\Jwt\Middleware\RefreshTokenMiddleware;
 use Xaamin\Jwt\Middleware\ValidateTokenMiddleware;
 
@@ -22,6 +24,8 @@ class JwtServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/jwt.php' => base_path('config/jwt.php'),
             ], 'jwt-config');
+
+            $this->registerCommands();
         } else {
             if (app() instanceof \Illuminate\Foundation\Application) {
                 // Laravel
@@ -43,6 +47,19 @@ class JwtServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/jwt.php', 'jwt');
 
+        $this->registerJwtSingleton();
+    }
+
+    protected function registerCommands()
+    {
+        $this->commands([
+            GenerateSecretCommand::class,
+            GenerateKeysCommand::class
+        ]);
+    }
+
+    protected function registerJwtSingleton()
+    {
         $this->app->singleton(Jwt::class, function ($app) {
             /** @var string[] */
             $requiredClaims = config('jwt.required_claims', []);
