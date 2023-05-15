@@ -30,5 +30,12 @@
         "phpunit/phpunit": "^7.5 || ^8.5 || ^9.6",
         "squizlabs/php_codesniffer": "^3.7",
         "phpstan/phpstan": "^1.10"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Xaamin\\Jwt\\JwtServiceProvider"
+            ]
+        }
     }
 }
