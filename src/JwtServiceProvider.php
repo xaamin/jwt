@@ -23,7 +23,7 @@ class JwtServiceProvider extends ServiceProvider
         if (app()->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/jwt.php' => base_path('config/jwt.php'),
-            ], 'jwt-config');
+            ], 'config');
 
             $this->registerCommands();
         } else {
