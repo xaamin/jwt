@@ -321,6 +321,20 @@ class Factory
     }
 
     /**
+     * Clears the claims binding. Help for Octane.
+     *
+     * @return void
+     */
+    public function clear()
+    {
+        $this->claims = [];
+        $this->except = [];
+        $this->customClaims = [];
+
+        return $this;
+    }
+
+    /**
      * Magically add a claim.
      *
      * @param string       $method
