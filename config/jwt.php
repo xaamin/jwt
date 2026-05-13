@@ -10,23 +10,23 @@ return [
      * Asymmetric Algorithms:
      * 		RS256, RS384 & RS512 will use 'keys'
      */
-	'algorithm' => 'HS256',
+	'algorithm' => env('JWT_ALGORITHM', 'HS256'),
 
    	/**
      * It will be used to sign your tokens, used for Symmetric algorithms.
    	 */
-    'secret' => null,
+    'secret' => env('JWT_SECRET', null),
 
     /**
      * Issuer used for iss claim, if not provided it will use the hostname
      */
-    'issuer' => null,
+    'issuer' => env('JWT_ISSUER', null),
 
     /**
      * When checking nbf, iat or expiration times, we want to provide some extra leeway time
      * to account for clock skew expressed in seconds.
      */
-    'leeway' => 0,
+    'leeway' => env('JWT_LEEWAY', 60),
 
     /**
      * Specify the length of time (in minutes) that the token will be valid for.
@@ -34,7 +34,7 @@ return [
      *
      * You can also set this to null, to yield a never expiring token.
      */
-    'ttl' => 60,
+    'ttl' => env('JWT_TTL', 60),
 
     /**
      * Refresh time to live
@@ -45,7 +45,7 @@ return [
      *
      * You can also set this to null, to yield an infinite refresh time.
      */
-    'refresh_ttl' => 20160,
+    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),
 
     /**
      * For asymmetric algorithm use the following public & private keys.
@@ -54,17 +54,17 @@ return [
         /**
          * Path or string of your public key.
          */
-        'public' => null,
+        'public' => env('JWT_PUBLIC_KEY', null),
 
         /**
          * Path or string of your private key.
          */
-        'private' => null,
+        'private' => env('JWT_PRIVATE_KEY', null),
 
         /*
          * The passphrase for your private key. Can be null if none set.
          */
-        'passphrase' => null,
+        'passphrase' => env('JWT_PRIVATE_KEY_PASSPHRASE', null),
     ],
 
     /**
