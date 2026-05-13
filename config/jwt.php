@@ -1,7 +1,7 @@
 <?php
 
 return [
-   	/**
+    /**
      * Specify the hashing algorithm that will be used to sign the token.
      *
      * Symmetric Algorithms:
@@ -10,11 +10,11 @@ return [
      * Asymmetric Algorithms:
      * 		RS256, RS384 & RS512 will use 'keys'
      */
-	'algorithm' => env('JWT_ALGORITHM', 'HS256'),
+    'algorithm' => env('JWT_ALGORITHM', 'HS256'),
 
-   	/**
+    /**
      * It will be used to sign your tokens, used for Symmetric algorithms.
-   	 */
+     */
     'secret' => env('JWT_SECRET', null),
 
     /**
