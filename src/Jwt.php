@@ -115,9 +115,11 @@ class Jwt
      */
     public function encode(array $claims)
     {
-        $payload = $this->factory->addClaims($claims)->make();
+        $payload = $this->factory->clear()->addClaims($claims)->make();
 
-        return $this->generateNewToken($payload);
+        $token = $this->generateNewToken($payload);
+
+        return $token;
     }
 
     /**
