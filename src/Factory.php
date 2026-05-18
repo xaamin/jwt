@@ -217,8 +217,6 @@ class Factory
             $issuer .= ':' . $_SERVER['SERVER_PORT'];
         }
 
-        $issuer .= isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
-
         return trim($issuer, '/');
     }
 
