@@ -13,7 +13,7 @@ class TokenValidation extends Validator
      *
      * @param string $value
      *
-     * @return void
+     * @return bool
      */
     public function check($value)
     {
@@ -22,6 +22,8 @@ class TokenValidation extends Validator
         $this->validateStructure($parts, $value);
 
         $this->validateParts($parts);
+
+        return true;
     }
 
     /**

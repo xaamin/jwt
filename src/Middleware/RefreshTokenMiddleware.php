@@ -36,7 +36,6 @@ class RefreshTokenMiddleware
         $code = 'jwt_invalid_token';
 
         try {
-            throw new TokenExpiredException('Invalid token');
             $this->jwt->checkOrFail($jwt);
         } catch (TokenExpiredException $e) {
             try {
