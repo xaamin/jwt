@@ -109,7 +109,7 @@ class Jwt
     /**
      * Encode a Payload and return the Token.
      *
-     * @param array <string,mixed> $claims
+     * @param array<string,mixed> $claims
      *
      * @return Token
      */
@@ -149,6 +149,8 @@ class Jwt
             throw new JwtException('Empty algorithm');
         }
 
+        $this->signer->setAlgorithm($header['alg']);
+
         if (!$this->signer->verify($token->getSignature(), "{$headerB64}.{$payloadB64}")) {
             throw new TokenInvalidSignatureException('Signature verification failed');
         }
@@ -181,15 +183,22 @@ class Jwt
      * Validates token validity
      *
      * @param string $jwt
+     * @param bool $returnPayload
      *
      * @return boolean
      */
-    public function check($jwt)
+    public function check($jwt, bool $returnPayload = false)
     {
+        $payload = null;
+
         try {
-            $this->checkOrFail($jwt);
+            $payload = $this->checkOrFail($jwt);
         } catch (JwtException $e) {
             return false;
+        }
+
+        if ($returnPayload) {
+            return $payload;
         }
 
         return true;

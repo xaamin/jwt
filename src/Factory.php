@@ -321,7 +321,7 @@ class Factory
     /**
      * Clears the claims binding. Help for Octane.
      *
-     * @return void
+     * @return Factory
      */
     public function clear()
     {
