@@ -114,17 +114,17 @@ class Native implements SignerContract
             case 'RS256':
                 $pubKeyId = $this->getPublicKeyId();
 
-                return openssl_verify($value, $signature, $pubKeyId, OPENSSL_ALGO_SHA256) !== false;
+                return openssl_verify($value, $signature, $pubKeyId, OPENSSL_ALGO_SHA256) === 1;
 
             case 'RS384':
                 $pubKeyId = $this->getPublicKeyId();
 
-                return openssl_verify($value, $signature, $pubKeyId, OPENSSL_ALGO_SHA384) !== false;
+                return openssl_verify($value, $signature, $pubKeyId, OPENSSL_ALGO_SHA384) === 1;
 
             case 'RS512':
                 $pubKeyId = $this->getPublicKeyId();
 
-                return openssl_verify($value, $signature, $pubKeyId, OPENSSL_ALGO_SHA512) !== false;
+                return openssl_verify($value, $signature, $pubKeyId, OPENSSL_ALGO_SHA512) === 1;
 
             default:
                 throw new JwtException("Unsupported or invalid signing algorithm.");
