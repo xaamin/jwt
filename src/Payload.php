@@ -212,4 +212,15 @@ class Payload implements Countable, ArrayAccess
     {
         return $this->get($claim);
     }
+
+    /**
+     * Getter for payload claims
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
 }
