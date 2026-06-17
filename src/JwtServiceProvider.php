@@ -63,7 +63,7 @@ class JwtServiceProvider extends ServiceProvider
         $this->app->bind(Jwt::class, function ($app) {
             /** @var string[] */
             $requiredClaims = config('jwt.required_claims', []);
-            $passphrase = strval(config('jwt.passphrase'));
+            $passphrase = strval(config('jwt.secret'));
             $algo = strval(config('jwt.algorithm'));
             $leeway = intval(config('jwt.leeway'));
             /** @var string|null */
